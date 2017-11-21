@@ -1,15 +1,18 @@
-from mongoengine import *
+import numpy as np 
 
-connect('test')
-class Employee(Document):
-    name = StringField(max_length=50)
-    age = IntField(required=False)
 
-john = Employee(name="John Doe", age=25)
-john.save() 
+a=[[1,2,3],[4,5,6],[7,8,9]]
 
-jane = Employee(name="Jane Doe", age=27)
-jane.save()
-
-for e in Employee.objects.all():
-    print (e["id"], e["name"], e["age"])
+print(type(a))
+b=np.array(a)
+print(type(b),b.shape)
+print(b[:,2])
+print(b[:,:2])
+c=[5,3,2,9]
+c.sort()
+print(c)
+print(round(3.0))
+belong=np.zeros(240)
+print(belong)
+for i in range(100,10):
+    print(i)
