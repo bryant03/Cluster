@@ -15,7 +15,7 @@ class Cluster(object):
 
  #  确定 dc  
     def cal_dc(self):
-        position=round(len(self.dis_list)*self.percent/100)
+        position=round(len(self.dis_list)*(100-self.percent)/100)
         self.dis_list.sort()
         print('position is ',  position)
         return self.dis_list[position]
@@ -27,26 +27,39 @@ class Cluster(object):
         id= 0
         for i in f:
             i=i.split()
+            i.append(123)
             i.append(id)
             for j in range(len(i)):
                 i[j]=float(i[j])
             id+=1
             data.append(i)
         self.dis_list=[]
+        d=np.asarray(data)
+        plt.plot(d[:,0],d[:,1],'bo')
+        plt.savefig(self.file_name+'.png')
+        plt.show()
+        # print(data)
+        # 确定距离截断点
 
-        dc=4.0
+
         for i in range(self.size):
-            sum=0
             for j in range(i+1,self.size):
                 self.dis_list.append(self.dis(data[i],data[j]))
-                if self.dis(data[i],data[j])< dc:
-                    # print(self.dis(data[i],data[j]))
+        dc=self.cal_dc()
+        print('dc is ',dc)
+        # 计算密度
+        for i in range(self.size):
+            sum=0
+            for j in range(i+1,self.size):        
+                if self.dis(data[i],data[j])< 0.5:
                     sum+=1
             data[i].append(sum)
-        dc=self.cal_dc()
+
         data=sorted(data, key=lambda x:x[4])
+        print(data)
         maxx=.0
         maxx_id=0
+        # 计算相对距离
         for i in range(self.size-1):
             tmp=10000000.0
             tmp_id=0
@@ -59,6 +72,7 @@ class Cluster(object):
             if round(tmp,2)>maxx:
                 maxx=round(tmp,2)
                 maxx_id=data[i][3]
+        # 计算密度最大点的相对距离
         data[self.size-1].append(maxx)
         data[self.size-1].append(maxx_id)
 
@@ -66,19 +80,19 @@ class Cluster(object):
         print(da[:,5])
         plt.xlabel("dis")
         plt.ylabel("rho")
-        # plt.plot(da[:100,4],da[:100,5],'ro')
+        plt.plot(da[:,4],da[:,5],'ro')
         # plt.plot(da[100:,4],da[100:,5],'o')
-        # plt.show()
+        plt.show()
         # for i in range(self.size):
         #     print(data[i])
-        belong=np.zeros(240)
+        belong=np.zeros(self.size)
         print(data)
         print('寻找数据中心：')
         # 用来确定密度最大的点的归属，因为很有可能密度最大的点不是聚类中心
         tmp_dis=100000.
         clas=1
         for i in range(self.size):
-            if data[i][4]>50. and data[i][5]>2.5:
+            if data[i][4]>0 and data[i][5]>0.6:
                 print(data[i])
                 belong[round(data[i][3])]=clas
                 if self.dis(data[i],data[self.size-1])<tmp_dis:
@@ -86,8 +100,8 @@ class Cluster(object):
                     tmp_dis=self.dis(data[i],data[self.size-1])
                 clas+=1
         print(belong)
+        # 确认所有其他点的归属
         for i in range(self.size-1,-1,-1):
-            print(i)
             if(belong[round(data[i][3])] == 0 ):
                 belong[round(data[i][3])] = belong[round(data[i][6])]
 
@@ -103,22 +117,33 @@ class Cluster(object):
         print('cnt1 is ',cnt1,'cnt2 is ',cnt2)
         col1=[]
         col2=[]
+        col3=[]
         correct=0
         for i in data:
             if belong[round(i[3])] == 1 :
                 col1.append(i[:2])
-            else:
+            elif belong[round(i[3])] == 2 :
                 col2.append(i[:2])
+            else:
+                col3.append(i[:2])
             if belong[round(i[3])] == round(i[2]):
                 correct+=1
 
         print('correct is ',correct)
+        print('rate is ',correct/self.size)
+
         col1=np.asarray(col1)
         col2=np.asarray(col2)
-        plt.plot(col1[:,0],col1[:,1],'ro')
-        plt.plot(col2[:,0],col2[:,1],'o')
+        col3=np.asarray(col3)
+        plt.plot(col1[:,0],col1[:,1],'bo')
+        plt.plot(col2[:,0],col2[:,1],'ro')
+        plt.plot(col3[:,0],col3[:,1],'yo')
+        plt.savefig(self.file_name+"2.png")
         plt.show()
 
 if __name__ == '__main__':
-    cluster=Cluster('flame.txt',240,2.)
-    cluster.read_data()
+    cluster1=Cluster('ds6.ds',1500,2)
+    cluster1.read_data()
+
+    # cluster1=Cluster('spiral.txt',312,2)
+    # cluster1.read_data()
