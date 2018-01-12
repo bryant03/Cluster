@@ -7,3 +7,5 @@ This is my DATA Mining homework about a intereting Cluster algorithm.
 <img src="ds4.ds2.png">
 <img src="ds5.ds2.png">
 <img src="ds6.ds2.png">
+## Comparison test
+<img src="test.png">
